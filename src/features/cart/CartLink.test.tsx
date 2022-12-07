@@ -1,10 +1,8 @@
-import { Provider } from "react-redux";
-import { BrowserRouter as Router } from "react-router-dom";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { CartLink } from "./CartLink";
 import { addToCart, updateQuantity, removeFromCart } from "./cartSlice";
-import { store } from "../../app/store";
+import { getStateWithItems, renderWithContext } from "../../test-utils";
 
 test("should contain a link", () => {
   renderWithContext(<CartLink />);
@@ -20,8 +18,9 @@ test("should show test when there are no items", () => {
 });
 
 test("ahould show the correct number of items", () => {
-  store.dispatch(addToCart("testItem"));
-  renderWithContext(<CartLink />);
+  const state = getStateWithItems({ testItem: 1 }, {});
+  const { store } = renderWithContext(<CartLink />, state);
+  // store.dispatch(addToCart("testItem"));
   const link = screen.getByRole("link");
   expect(link).toHaveTextContent("1");
   store.dispatch(updateQuantity({ id: "testItem", quantity: 5 }));
@@ -32,11 +31,3 @@ test("ahould show the correct number of items", () => {
   store.dispatch(removeFromCart("anotherItem"));
   expect(link).toHaveTextContent("Cart");
 });
-
-function renderWithContext(element: React.ReactElement) {
-  render(
-    <Provider store={store}>
-      <Router>{element}</Router>
-    </Provider>
-  );
-}
